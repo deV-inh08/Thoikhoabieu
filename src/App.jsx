@@ -61,6 +61,13 @@ const TERM_START = parseDMY("07/09/2026"); // Monday, Tuần 1
 const TOTAL_WEEKS = 12;
 const weekMondays = Array.from({ length: TOTAL_WEEKS }, (_, i) => addDays(TERM_START, i * 7));
 
+const getCurrentWeekIndex = (now = new Date()) => {
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diffDays = Math.floor((todayStart - TERM_START) / (1000 * 60 * 60 * 24));
+  const idx = Math.floor(diffDays / 7);
+  return Math.min( TOTAL_WEEKS - 1, Math.max(0, idx));
+};
+
 const DAY_LABELS = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"];
 
 // ---------- Original cute "little devil" mascot (not any licensed character) ----------
@@ -125,12 +132,13 @@ function PolkaDots({ style }) {
 }
 
 export default function ThoiKhoaBieu() {
-  const [weekIndex, setWeekIndex] = useState(0);
+  const today = new Date();
+  const currentWeekIdx = getCurrentWeekIndex(today);
+  const [weekIndex, setWeekIndex] = useState(() => getCurrentWeekIndex());
 
   const monday = weekMondays[weekIndex];
   const weekDates = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(monday, i)), [monday]);
   const sunday = weekDates[6];
-  const today = new Date();
 
   // For each day, the list of items active during this specific week, sorted by start period.
   const dayItems = useMemo(() => {
@@ -262,6 +270,25 @@ export default function ThoiKhoaBieu() {
             >
               <ChevronRight size={18} />
             </NavButton>
+
+            <button
+              className="no-print"
+              onClick={() => setWeekIndex(currentWeekIdx)}
+              disabled={weekIndex === currentWeekIdx}
+              style={{
+                background: weekIndex === currentWeekIdx ? "#F3ECFB" : "#5B3286",
+                border: "1px solid #D9C4EE",
+                color: weekIndex === currentWeekIdx ? "#9078AC" : "#FFFFFF",
+                fontWeight: 600,
+                borderRadius: 10,
+                padding: "9px 14px",
+                cursor: weekIndex === currentWeekIdx ? "default" : "pointer",
+                fontSize: 13.5,
+                flexShrink: 0,
+              }}
+            >
+              Hôm nay
+            </button>
           </div>
 
           <button
